@@ -8,10 +8,27 @@ class Controller:
         # the model, which implements the logic of the program and holds the data
         self._model = model
 
-    def handle_hello(self, e):
-        name = self._view.txt_name.value
-        if name is None or name == "":
-            self._view.create_alert("Inserire il nome")
+    def handle_analisi(self, e):
+        self._view.txt_result.clean()
+        inp=self._view.txt_airportid.value
+        if not inp:
+            self._view.create_alert("Inserisci una distanza minima!")
             return
-        self._view.txt_result.controls.append(ft.Text(f"Hello, {name}!"))
+        try:
+            miglia=int(inp)
+        except ValueError:
+            self._view.txt_result.controls.clean()
+            self._view.txt_result.controls.append(ft.Text("Attenzione inserire un valore numerico", color="red"))
+            self._view.update_page()
+            return
+
+        self._model.buildGraph(miglia)
+        self._view.txt_result.controls.append(ft.Text("Grafo correttamente creato"))
+        self._view.txt_result.controls.append(ft.Text(f"Il grafo è costituito da {self._model.get_numnodi()} nodi"))
+        self._view.txt_result.controls.append(ft.Text(f"Il grafo è costituito da {self._model.get_numarchi()} archi"))
+        edges=self._model.get_edges()
+        for edge in edges:
+            self._view.txt_result.controls.append(
+                ft.Text(f"{edge[0]} <---> {edge[1]} | Distanza media: {edge[2]["weight"]:.2f} miglia"))
+
         self._view.update_page()
